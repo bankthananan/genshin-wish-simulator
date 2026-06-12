@@ -4,6 +4,19 @@
 
 const $ = sel => document.querySelector(sel);
 
+/* settings live outside the game save so Reset keeps them */
+const SETTINGS_KEY = "genshin-wish-sim-settings";
+const SETTINGS = Object.assign({ sound: true, anim: true }, (() => {
+  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch (e) { return {}; }
+})());
+function saveSettings() {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(SETTINGS)); } catch (e) {}
+  SFX.setEnabled(SETTINGS.sound);
+  $("#sound-toggle").textContent = SETTINGS.sound ? "🔊" : "🔇";
+  $("#sound-toggle").classList.toggle("off", !SETTINGS.sound);
+  $("#anim-toggle").classList.toggle("off", !SETTINGS.anim);
+}
+
 let currentVer = ALL_VERSIONS[ALL_VERSIONS.length - 1];
 let currentBannerKey = null;
 let targetId = null;          // chosen featured 5★ on double banners
@@ -323,10 +336,15 @@ function showResults(results, ownedBefore) {
   buildSummary(results, ownedBefore);
   $("#results-overlay").classList.remove("hidden");
 
-  const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduced) { showSummary(); return; }
-
   const best = Math.max(...results.map(r => r.rarity));
+  const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced || !SETTINGS.anim) {
+    SFX.reveal(best, results.some(r => r.fifty === "radiance"));
+    showSummary();
+    return;
+  }
+
+  SFX.whoosh();
   const cin = $("#cinematic");
   cin.classList.remove("rarity-r3", "rarity-r4", "rarity-r5");
   cin.classList.add("rarity-r" + best);
@@ -338,6 +356,7 @@ function showResults(results, ownedBefore) {
 }
 
 function flashTo(cb) {
+  SFX.flash();
   const f = $("#flash");
   f.classList.remove("hidden");
   void f.offsetWidth;
@@ -353,6 +372,7 @@ function showRevealCard(i) {
   const icon = isChar ? ELEMENTS[c.element].icon : WEAPON_ICONS[r.weapon];
   const isNew = isChar && !revealOwnedBefore[r.id];
   const isRadiance = r.fifty === "radiance";
+  SFX.reveal(r.rarity, isRadiance);
   const stage = $("#reveal-stage");
   stage.className = "stage reveal-r" + r.rarity + (isRadiance ? " reveal-radiance" : "");
   stage.innerHTML = `
@@ -423,6 +443,9 @@ $("#reset-btn").onclick = () => {
   if (confirm("Reset all pulls, pity and inventory?")) { resetState(); renderAll(); }
 };
 
+$("#sound-toggle").onclick = () => { SETTINGS.sound = !SETTINGS.sound; saveSettings(); };
+$("#anim-toggle").onclick = () => { SETTINGS.anim = !SETTINGS.anim; saveSettings(); };
+
 $("#history-filter").querySelectorAll("button").forEach(btn => {
   btn.onclick = () => {
     historyFilter = btn.dataset.f;
@@ -432,5 +455,6 @@ $("#history-filter").querySelectorAll("button").forEach(btn => {
 });
 
 renderVersionSelect();
+saveSettings();
 selectBanner(EVENT_BANNERS.filter(b => b.ver === currentVer)[0].key);
 renderAll();

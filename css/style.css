@@ -155,6 +155,8 @@ h3 { font-size: 0.9rem; margin: 14px 0 8px; }
   padding: 6px 12px; color: var(--muted);
 }
 .btn-ghost:hover, .btn-ghost.active { color: var(--text); border-color: var(--gold); }
+.toggle-btn { font-size: 1rem; padding: 5px 10px; }
+.toggle-btn.off { opacity: 0.4; filter: grayscale(1); }
 
 .wish-buttons { display: flex; gap: 12px; margin-top: 18px; }
 .btn-wish {
