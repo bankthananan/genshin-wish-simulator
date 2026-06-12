@@ -351,3 +351,42 @@ h3 { font-size: 0.9rem; margin: 14px 0 8px; }
 .reveal-hint { margin-top: 36px; font-size: 0.78rem; color: var(--muted); opacity: 0.8; }
 
 #summary-stage { position: relative; z-index: 53; }
+
+/* ---------- Capturing Radiance: prismatic variant ---------- */
+#cinematic.radiance { --mglow: rgba(255, 224, 150, 0.95); }
+#cinematic.radiance .meteor {
+  background: linear-gradient(90deg, transparent 0%, #7fe8c9 45%, #ffd784 70%, #cda5ff 85%, #fff 100%);
+  box-shadow: 0 0 30px 8px var(--mglow), 0 0 70px 16px rgba(160, 220, 200, 0.35);
+}
+
+#reveal-stage.reveal-radiance {
+  background: radial-gradient(ellipse at center, #4d3b17 0%, #1a1208 45%, #0c0a12 80%);
+}
+
+.reveal-card.radiance .reveal-rays {
+  background: repeating-conic-gradient(rgba(255, 225, 150, 0.22) 0deg 7deg, transparent 7deg 16deg);
+  animation: rays-spin 9s linear infinite;
+}
+.reveal-card.radiance .reveal-icon {
+  border-color: #fff0c2;
+  animation: radiance-pulse 1.5s ease-in-out infinite;
+}
+@keyframes radiance-pulse {
+  0%, 100% { box-shadow: 0 0 50px rgba(255, 210, 120, 0.85), 0 0 110px rgba(127, 232, 201, 0.35); }
+  50%      { box-shadow: 0 0 75px rgba(255, 225, 150, 1),    0 0 130px rgba(205, 165, 255, 0.5); }
+}
+
+.radiance-banner {
+  position: relative; display: inline-block; margin-bottom: 14px;
+  padding: 5px 18px; border-radius: 999px;
+  font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; color: #3a2a05;
+  background: linear-gradient(90deg, #7fe8c9, #ffd784, #cda5ff, #ffd784, #7fe8c9);
+  background-size: 300% 100%;
+  animation: radiance-shimmer 2.4s linear infinite, name-rise 0.5s 0.15s backwards;
+}
+@keyframes radiance-shimmer { to { background-position: 300% 0; } }
+
+.result-card.radiance {
+  border-color: #ffe9a8;
+  box-shadow: 0 0 14px rgba(255, 210, 120, 0.7), 0 0 26px rgba(127, 232, 201, 0.35);
+}

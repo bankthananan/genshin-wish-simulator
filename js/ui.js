@@ -330,6 +330,7 @@ function showResults(results, ownedBefore) {
   const cin = $("#cinematic");
   cin.classList.remove("rarity-r3", "rarity-r4", "rarity-r5");
   cin.classList.add("rarity-r" + best);
+  cin.classList.toggle("radiance", results.some(r => r.fifty === "radiance"));
   // restart the meteor animation
   cin.querySelectorAll(".meteor").forEach(m => { m.style.animation = "none"; void m.offsetWidth; m.style.animation = ""; });
   showStage("cinematic");
@@ -351,11 +352,13 @@ function showRevealCard(i) {
   const c = isChar ? CHAR_BY_ID[r.id] : null;
   const icon = isChar ? ELEMENTS[c.element].icon : WEAPON_ICONS[r.weapon];
   const isNew = isChar && !revealOwnedBefore[r.id];
+  const isRadiance = r.fifty === "radiance";
   const stage = $("#reveal-stage");
-  stage.className = "stage reveal-r" + r.rarity;
+  stage.className = "stage reveal-r" + r.rarity + (isRadiance ? " reveal-radiance" : "");
   stage.innerHTML = `
-    <div class="reveal-card r${r.rarity}">
+    <div class="reveal-card r${r.rarity}${isRadiance ? " radiance" : ""}">
       <div class="reveal-rays"></div>
+      ${isRadiance ? `<div class="radiance-banner">✨ Capturing Radiance!</div>` : ""}
       <div class="reveal-icon" style="${isChar ? `background:${elemGrad(c)};` : ""}">${icon}</div>
       <div class="reveal-stars">${Array.from({ length: r.rarity }, (_, j) =>
         `<span style="animation-delay:${0.4 + j * 0.12}s">★</span>`).join("")}</div>
@@ -384,7 +387,7 @@ function buildSummary(results, ownedBefore) {
   $("#results-grid").innerHTML = results.map((r, i) => {
     const isNew = r.kind === "char" && !ownedBefore[r.id];
     const bg = r.kind === "char" ? `background:${elemGrad(CHAR_BY_ID[r.id])};` : "";
-    return `<div class="result-card r${r.rarity}" style="${bg}animation-delay:${i * 0.06}s">
+    return `<div class="result-card r${r.rarity}${r.fifty === "radiance" ? " radiance" : ""}" style="${bg}animation-delay:${i * 0.06}s">
       <div class="result-stars r${r.rarity}-text">${stars(r.rarity)}</div>
       <div class="result-icon">${r.kind === "char" ? ELEMENTS[r.element].icon : WEAPON_ICONS[r.weapon]}</div>
       <div class="result-name">${r.name}</div>
