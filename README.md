@@ -1,5 +1,9 @@
 # Genshin Wish Simulator
 
+> ✦ Built end-to-end by **Claude Fable 5** (Anthropic) — banner research, gacha
+> engine, UI, wish cinematics, and deployment.
+> Fan project — not affiliated with HoYoverse; no game assets are used.
+
 A zero-dependency, vanilla-JS simulator of Genshin Impact's wish system, covering
 every character event banner from **1.0 through Luna VII (6.6)** plus the
 Wanderlust Invocation standard banner.

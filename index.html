@@ -84,13 +84,21 @@
     <div id="inventory"></div>
   </section>
 
-  <!-- pull results overlay -->
+  <!-- pull results overlay: cinematic → reveals → summary -->
   <div id="results-overlay" class="overlay hidden">
-    <div class="overlay-inner">
+    <button id="skip-btn" class="btn btn-ghost skip-btn hidden">Skip ››</button>
+    <div id="cinematic" class="stage hidden">
+      <div class="meteor meteor-main"></div>
+      <div class="meteor meteor-c1"></div>
+      <div class="meteor meteor-c2"></div>
+    </div>
+    <div id="reveal-stage" class="stage hidden"></div>
+    <div id="summary-stage" class="overlay-inner hidden">
       <h2 id="results-title">Wish Results</h2>
       <div id="results-grid" class="results-grid"></div>
       <button id="results-close" class="btn btn-wish">Continue</button>
     </div>
+    <div id="flash" class="flash hidden"></div>
   </div>
 
   <script src="js/data.js"></script>

@@ -303,7 +303,79 @@ function wish(count) {
   renderAll();
 }
 
+/* ---------- wish cinematic: meteor → one-by-one reveals → summary ---------- */
+let revealQueue = [], revealIdx = 0, revealOwnedBefore = {};
+let cinTimer = null, flashTimer = null;
+
+function clearFlowTimers() {
+  clearTimeout(cinTimer); clearTimeout(flashTimer);
+  $("#flash").classList.add("hidden");
+}
+
+function showStage(name) {
+  ["cinematic", "reveal-stage", "summary-stage"].forEach(id =>
+    document.getElementById(id).classList.toggle("hidden", !id.startsWith(name)));
+  $("#skip-btn").classList.toggle("hidden", name === "summary");
+}
+
 function showResults(results, ownedBefore) {
+  revealQueue = results; revealIdx = 0; revealOwnedBefore = ownedBefore;
+  buildSummary(results, ownedBefore);
+  $("#results-overlay").classList.remove("hidden");
+
+  const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) { showSummary(); return; }
+
+  const best = Math.max(...results.map(r => r.rarity));
+  const cin = $("#cinematic");
+  cin.classList.remove("rarity-r3", "rarity-r4", "rarity-r5");
+  cin.classList.add("rarity-r" + best);
+  // restart the meteor animation
+  cin.querySelectorAll(".meteor").forEach(m => { m.style.animation = "none"; void m.offsetWidth; m.style.animation = ""; });
+  showStage("cinematic");
+  cinTimer = setTimeout(() => flashTo(() => showRevealCard(0)), 1900);
+}
+
+function flashTo(cb) {
+  const f = $("#flash");
+  f.classList.remove("hidden");
+  void f.offsetWidth;
+  flashTimer = setTimeout(() => { f.classList.add("hidden"); cb(); }, 320);
+}
+
+function showRevealCard(i) {
+  if (i >= revealQueue.length) { showSummary(); return; }
+  revealIdx = i;
+  const r = revealQueue[i];
+  const isChar = r.kind === "char";
+  const c = isChar ? CHAR_BY_ID[r.id] : null;
+  const icon = isChar ? ELEMENTS[c.element].icon : WEAPON_ICONS[r.weapon];
+  const isNew = isChar && !revealOwnedBefore[r.id];
+  const stage = $("#reveal-stage");
+  stage.className = "stage reveal-r" + r.rarity;
+  stage.innerHTML = `
+    <div class="reveal-card r${r.rarity}">
+      <div class="reveal-rays"></div>
+      <div class="reveal-icon" style="${isChar ? `background:${elemGrad(c)};` : ""}">${icon}</div>
+      <div class="reveal-stars">${Array.from({ length: r.rarity }, (_, j) =>
+        `<span style="animation-delay:${0.4 + j * 0.12}s">★</span>`).join("")}</div>
+      <div class="reveal-name r${r.rarity}-text">${r.name}</div>
+      <div class="reveal-sub">
+        ${isChar ? `${c.element} · ${c.weapon}` : r.weapon}
+        ${isNew ? `<span class="new-tag">NEW</span>` : isChar ? `· C${r.copies - 1}` : `· R${Math.min(5, r.copies)}`}
+        ${fiftyLabel(r.fifty)}
+      </div>
+      <div class="reveal-hint">${i + 1} / ${revealQueue.length} — tap to continue</div>
+    </div>`;
+  showStage("reveal");
+}
+
+function showSummary() {
+  clearFlowTimers();
+  showStage("summary");
+}
+
+function buildSummary(results, ownedBefore) {
   const best = Math.max(...results.map(r => r.rarity));
   $("#results-title").innerHTML =
     best === 5 ? `<span class="gold-text">${stars(5)} A radiant light...</span>` :
@@ -322,7 +394,6 @@ function showResults(results, ownedBefore) {
       </div>
     </div>`;
   }).join("");
-  $("#results-overlay").classList.remove("hidden");
 }
 
 /* ---------- boot ---------- */
@@ -337,8 +408,13 @@ function renderAll() {
 
 $("#wish1-btn").onclick = () => wish(1);
 $("#wish10-btn").onclick = () => wish(10);
-$("#results-close").onclick = () => $("#results-overlay").classList.add("hidden");
-$("#results-overlay").onclick = e => { if (e.target.id === "results-overlay") e.target.classList.add("hidden"); };
+$("#results-close").onclick = () => { clearFlowTimers(); $("#results-overlay").classList.add("hidden"); };
+$("#skip-btn").onclick = showSummary;
+$("#cinematic").onclick = () => { clearTimeout(cinTimer); flashTo(() => showRevealCard(0)); };
+$("#reveal-stage").onclick = () => showRevealCard(revealIdx + 1);
+$("#results-overlay").onclick = e => {
+  if (e.target.id === "results-overlay") { clearFlowTimers(); e.target.classList.add("hidden"); }
+};
 
 $("#reset-btn").onclick = () => {
   if (confirm("Reset all pulls, pity and inventory?")) { resetState(); renderAll(); }
