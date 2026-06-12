@@ -179,6 +179,16 @@ h3 { font-size: 0.9rem; margin: 14px 0 8px; }
 .stats-list dt { color: var(--muted); font-size: 0.82rem; }
 .stats-list dd { font-size: 0.82rem; font-variant-numeric: tabular-nums; }
 
+.spend-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.spend-controls select {
+  padding: 5px 8px; border-radius: 8px;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+}
+.pack-label { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.spend-amount { font-size: 1.25rem; font-weight: 700; color: var(--gold-soft); font-variant-numeric: tabular-nums; }
+.spend-packs { font-size: 0.76rem; color: var(--muted); margin-top: 3px; }
+.spend-note { margin: 6px 0 14px; }
+
 .five-star-log { list-style: none; max-height: 260px; overflow-y: auto; }
 .five-star-log li { padding: 5px 0; border-bottom: 1px dashed #2c3243; font-size: 0.82rem; }
 .log-meta { color: var(--muted); font-size: 0.75rem; }

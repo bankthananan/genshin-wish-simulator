@@ -6,7 +6,7 @@ const $ = sel => document.querySelector(sel);
 
 /* settings live outside the game save so Reset keeps them */
 const SETTINGS_KEY = "genshin-wish-sim-settings";
-const SETTINGS = Object.assign({ sound: true, anim: true }, (() => {
+const SETTINGS = Object.assign({ sound: true, anim: true, currency: "USD", packs: false }, (() => {
   try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch (e) { return {}; }
 })());
 function saveSettings() {
@@ -236,6 +236,80 @@ function renderPity() {
   $("#guarantee-tags").innerHTML = tags.join("");
 }
 
+/* ---------- real-money cost ---------- */
+function formatMoney(code, v) {
+  const cur = PACK_PRICES[code];
+  const digits = cur.zeroDec ? 0 : 2;
+  return cur.symbol + v.toLocaleString(undefined,
+    { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+/* dp[c] = cheapest whole-pack cost covering at least c crystals (c ≤ 8080) */
+const packDpCache = {};
+function packDp(code) {
+  if (packDpCache[code]) return packDpCache[code];
+  const prices = PACK_PRICES[code].prices;
+  const top = CRYSTAL_PACKS[CRYSTAL_PACKS.length - 1];
+  const dp = new Float64Array(top + 1);
+  const choice = new Int8Array(top + 1);
+  for (let c = 1; c <= top; c++) {
+    let best = Infinity, bi = 0;
+    for (let i = 0; i < CRYSTAL_PACKS.length; i++) {
+      const cost = prices[i] + dp[Math.max(0, c - CRYSTAL_PACKS[i])];
+      if (cost < best - 1e-9) { best = cost; bi = i; }
+    }
+    dp[c] = best; choice[c] = bi;
+  }
+  return packDpCache[code] = { dp, choice };
+}
+
+function spendPlan(primos, code) {
+  const prices = PACK_PRICES[code].prices;
+  const topIdx = CRYSTAL_PACKS.length - 1;
+  const top = CRYSTAL_PACKS[topIdx];
+
+  if (!SETTINGS.packs)            // best bulk rate, fractional
+    return { cost: primos * prices[topIdx] / top, counts: null };
+
+  const counts = new Array(CRYSTAL_PACKS.length).fill(0);
+  counts[topIdx] = Math.floor(primos / top);
+  let rem = primos - counts[topIdx] * top;
+  let cost = counts[topIdx] * prices[topIdx];
+  const { dp, choice } = packDp(code);
+  cost += dp[rem];
+  while (rem > 0) {               // reconstruct the remainder's packs
+    const i = choice[rem];
+    counts[i]++;
+    rem = Math.max(0, rem - CRYSTAL_PACKS[i]);
+  }
+  return { cost, counts };
+}
+
+function renderSpend() {
+  const primos = G.totalWishes * PRIMOS_PER_WISH;
+  const box = $("#spend-result");
+  if (!primos) { box.innerHTML = `<span class="log-meta">No wishes yet.</span>`; return; }
+  const plan = spendPlan(primos, SETTINGS.currency);
+  let html = `<div class="spend-amount">≈ ${formatMoney(SETTINGS.currency, plan.cost)}</div>`;
+  if (plan.counts) {
+    html += `<div class="spend-packs">` + plan.counts
+      .map((n, i) => n ? `${n}× ${CRYSTAL_PACKS[i].toLocaleString()}` : "")
+      .filter(Boolean).join(" · ") + ` crystals</div>`;
+  }
+  box.innerHTML = html;
+}
+
+function renderCurrencyControls() {
+  const sel = $("#currency-select");
+  sel.innerHTML = Object.keys(PACK_PRICES)
+    .map(c => `<option value="${c}">${c} (${PACK_PRICES[c].symbol})</option>`).join("");
+  sel.value = SETTINGS.currency;
+  sel.onchange = () => { SETTINGS.currency = sel.value; saveSettings(); renderSpend(); };
+  const cb = $("#pack-mode");
+  cb.checked = SETTINGS.packs;
+  cb.onchange = () => { SETTINGS.packs = cb.checked; saveSettings(); renderSpend(); };
+}
+
 /* ---------- stats ---------- */
 function renderStats() {
   const s = G.stats;
@@ -254,6 +328,7 @@ function renderStats() {
   ];
   $("#stats-list").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
   $("#primo-count").textContent = (G.totalWishes * PRIMOS_PER_WISH).toLocaleString();
+  renderSpend();
 
   const fives = G.history.filter(h => h.rarity === 5);
   $("#five-star-log").innerHTML = fives.slice(-30).reverse().map(h => `
@@ -455,6 +530,7 @@ $("#history-filter").querySelectorAll("button").forEach(btn => {
 });
 
 renderVersionSelect();
+renderCurrencyControls();
 saveSettings();
 selectBanner(EVENT_BANNERS.filter(b => b.ver === currentVer)[0].key);
 renderAll();

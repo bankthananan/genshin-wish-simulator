@@ -264,6 +264,27 @@ const THREE_STAR_WEAPONS = [
   { name: "Raven Bow", weapon: "Bow" },
 ];
 
+/* ---------- Real-money cost: Genesis Crystal top-up packs ----------
+   Crystals per pack include the standard bonus (e.g. 6480+1600).
+   1 crystal = 1 primogem, 1 wish = 160 primogems.
+   USD and CNY are exact store prices; other currencies are approximate
+   regional store prices — edit here if yours differ. No first-purchase
+   double bonus is modeled. */
+const CRYSTAL_PACKS = [60, 330, 1090, 2240, 3880, 8080];
+
+const PACK_PRICES = {
+  USD: { symbol: "$",  prices: [0.99, 4.99, 14.99, 29.99, 49.99, 99.99] },
+  EUR: { symbol: "€",  prices: [1.19, 5.49, 16.99, 32.99, 54.99, 109.99] },
+  GBP: { symbol: "£",  prices: [0.99, 4.99, 14.99, 29.99, 48.99, 99.99] },
+  THB: { symbol: "฿",  prices: [35, 179, 549, 1100, 1800, 3699] },
+  JPY: { symbol: "¥",  prices: [160, 800, 2440, 4900, 8000, 16000], zeroDec: true },
+  CNY: { symbol: "¥",  prices: [6, 30, 98, 198, 328, 648] },
+  KRW: { symbol: "₩",  prices: [1500, 6600, 22000, 44000, 74000, 149000], zeroDec: true },
+  SGD: { symbol: "S$", prices: [1.48, 6.98, 21.98, 43.98, 68.98, 148.98] },
+  AUD: { symbol: "A$", prices: [1.49, 7.99, 24.99, 49.99, 79.99, 159.99] },
+  CAD: { symbol: "C$", prices: [1.39, 6.99, 20.99, 39.99, 66.99, 134.99] },
+};
+
 /* ---------- Version display names ---------- */
 const VERSION_NAMES = {
   "6.0": "Luna I", "6.1": "Luna II", "6.2": "Luna III", "6.3": "Luna IV",
