@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Genshin Wish Simulator</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <h1>✦ Genshin Wish Simulator</h1>
+    <div class="topbar-right">
+      <label class="era-select">
+        Version
+        <select id="version-select"></select>
+      </label>
+      <div class="primo-counter" title="Primogems spent (160 per wish)">
+        <span class="primo-icon">💎</span><span id="primo-count">0</span>
+      </div>
+      <button id="reset-btn" class="btn btn-ghost" title="Wipe all pulls, pity and inventory">Reset</button>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- banner picker -->
+    <aside class="panel banner-list-panel">
+      <h2 id="banner-list-title">Banners</h2>
+      <div id="banner-list"></div>
+    </aside>
+
+    <!-- selected banner + wishing -->
+    <section class="panel wish-panel">
+      <div id="banner-detail"></div>
+
+      <div class="pity-block">
+        <div class="pity-row">
+          <span class="pity-label">5★ pity</span>
+          <div class="pity-bar"><div id="pity5-fill" class="pity-fill gold"></div></div>
+          <span id="pity5-text" class="pity-num">0 / 90</span>
+        </div>
+        <div class="pity-row">
+          <span class="pity-label">4★ pity</span>
+          <div class="pity-bar"><div id="pity4-fill" class="pity-fill purple"></div></div>
+          <span id="pity4-text" class="pity-num">0 / 10</span>
+        </div>
+        <div id="guarantee-tags" class="guarantee-tags"></div>
+      </div>
+
+      <div class="wish-buttons">
+        <button id="wish1-btn" class="btn btn-wish">Wish ×1 <small>160 💎</small></button>
+        <button id="wish10-btn" class="btn btn-wish btn-wish-10">Wish ×10 <small>1600 💎</small></button>
+      </div>
+    </section>
+
+    <!-- stats -->
+    <aside class="panel stats-panel">
+      <h2>Statistics</h2>
+      <dl id="stats-list" class="stats-list"></dl>
+      <h2>5★ Timeline</h2>
+      <ol id="five-star-log" class="five-star-log"></ol>
+    </aside>
+
+  </main>
+
+  <section class="panel history-panel">
+    <div class="history-header">
+      <h2>History</h2>
+      <div class="filter-btns" id="history-filter">
+        <button data-f="all" class="btn btn-ghost active">All</button>
+        <button data-f="5" class="btn btn-ghost">5★</button>
+        <button data-f="4" class="btn btn-ghost">4★</button>
+      </div>
+    </div>
+    <table class="history-table">
+      <thead><tr><th>#</th><th>Item</th><th>Banner</th><th>Pity</th><th>50/50</th></tr></thead>
+      <tbody id="history-body"></tbody>
+    </table>
+  </section>
+
+  <section class="panel inventory-panel">
+    <h2>Inventory</h2>
+    <div id="inventory"></div>
+  </section>
+
+  <!-- pull results overlay -->
+  <div id="results-overlay" class="overlay hidden">
+    <div class="overlay-inner">
+      <h2 id="results-title">Wish Results</h2>
+      <div id="results-grid" class="results-grid"></div>
+      <button id="results-close" class="btn btn-wish">Continue</button>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/gacha.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
